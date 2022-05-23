@@ -1,15 +1,13 @@
 FROM golang:1.16-alpine as builder
 
-WORKDIR /go/src/app 
+WORKDIR /app 
 
 COPY . .
 
-RUN go build main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags netgo -ldflags '-s -w' -o desafio-go
 
 FROM scratch
 
-WORKDIR /go/src/app
+COPY --from=builder /app/desafio-go /app/desafio-go
 
-COPY --from=builder /go/src/app .
-
-ENTRYPOINT ["./main"]
+ENTRYPOINT ["/app/desafio-go"]
